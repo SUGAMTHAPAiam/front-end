@@ -4,16 +4,14 @@ export default function AuthPage({ onLogin }) {
   const [mode, setMode] = useState('login');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const [loginUsername, setLoginUsername] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
-  const [showLoginPassword, setShowLoginPassword] = useState(false);
 
   const [regUsername, setRegUsername] = useState('');
   const [regPassword, setRegPassword] = useState('');
   const [regConfirmPassword, setRegConfirmPassword] = useState('');
-  const [showRegPassword, setShowRegPassword] = useState(false);
-  const [showRegConfirmPassword, setShowRegConfirmPassword] = useState(false);
 
   const [forgotEmail, setForgotEmail] = useState('');
 
@@ -28,7 +26,8 @@ export default function AuthPage({ onLogin }) {
     setLoading(true);
     try {
       await fakeApiCall('logged in');
-      onLogin();
+      setIsLoggedIn(true);
+      onLogin?.();
     } catch {
       setError('Login failed');
     }
@@ -48,7 +47,7 @@ export default function AuthPage({ onLogin }) {
     setLoading(true);
     try {
       await fakeApiCall('registered');
-      alert('Registered! Please login.');
+      alert('Registered successfully! Please login.');
       setMode('login');
     } catch {
       setError('Registration failed');
@@ -64,13 +63,19 @@ export default function AuthPage({ onLogin }) {
     setError('');
     setLoading(true);
     try {
-      await fakeApiCall('reset link sent');
+      await fakeApiCall('reset sent');
       alert('Password reset link sent!');
       setMode('login');
     } catch {
-      setError('Failed to send reset link');
+      setError('Reset failed');
     }
     setLoading(false);
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setLoginUsername('');
+    setLoginPassword('');
   };
 
   const styles = {
@@ -80,180 +85,207 @@ export default function AuthPage({ onLogin }) {
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
-      fontFamily: 'Segoe UI, sans-serif',
+      fontFamily: 'Arial, sans-serif',
       padding: 20,
-      color: '#fff',
+      color: '#eee',
     },
     box: {
       maxWidth: 400,
-      backgroundColor: '#1a1a1a',
-      borderRadius: 12,
-      padding: 30,
-      boxShadow: '0 10px 25px rgba(255,255,255,0.08)',
       width: '100%',
-      textAlign: 'center',
+      backgroundColor: '#222',
+      padding: 30,
+      borderRadius: 10,
+      boxShadow: '0 4px 12px rgba(0,0,0,0.8)',
     },
     header: {
-      fontSize: 26,
-      fontWeight: 700,
-      marginBottom: 20,
-      color: '#ffffff',
-    },
-    inputGroup: {
-      position: 'relative',
-      marginBottom: 16,
-      maxWidth: 320,
-      marginLeft: 'auto',
-      marginRight: 'auto',
-      textAlign: 'left',
-    },
-    inputIcon: {
-      position: 'absolute',
-      top: '50%',
-      left: 10,
-      transform: 'translateY(-50%)',
-      fontSize: 18,
-      color: '#999',
-      pointerEvents: 'none',
+      textAlign: 'center',
+      marginBottom: 24,
+      fontSize: 22,
+      fontWeight: 'bold',
     },
     input: {
       width: '100%',
-      padding: '16px 35px 16px 35px',
-      borderRadius: 8,
-      background: '#333',
-      border: '1px solid #555',
-      color: '#fff',
-      fontSize: '14px',
+      padding: 12,
+      marginBottom: 16,
+      borderRadius: 6,
+      border: '1px solid #444',
+      backgroundColor: '#333',
+      color: '#eee',
+      fontSize: 16,
       outline: 'none',
     },
-    toggleBtn: {
-      position: 'absolute',
-      top: '50%',
-      right: 10,
-      transform: 'translateY(-50%)',
-      background: 'none',
+    button: {
+      width: '100%',
+      padding: 14,
+      borderRadius: 6,
       border: 'none',
-      color: '#ccc',
+      fontSize: 16,
+      fontWeight: '600',
+      color: '#fff',
       cursor: 'pointer',
-      fontSize: 14,
+      backgroundColor: '#007bff',
+      marginTop: 8,
     },
-    submit: {
-      width: '70%',
-      padding: 10,
-      background: 'linear-gradient(to right, #ff416c, #ff4b2b)',
-      border: 'none',
-      borderRadius: 8,
-      fontSize: 14,
-      fontWeight: 600,
-      cursor: 'pointer',
-      color: 'white',
-      marginTop: 12,
-    },
-    submitDisabled: {
-      opacity: 0.6,
+    buttonDisabled: {
+      opacity: 0.5,
       cursor: 'not-allowed',
     },
+    logoutButton: {
+      backgroundColor: '#dc3545',
+      marginTop: 20,
+    },
     error: {
-      marginBottom: 16,
-      padding: 12,
-      borderRadius: 6,
       backgroundColor: '#ff4d4d',
-      color: 'white',
+      color: '#fff',
+      padding: 10,
+      borderRadius: 6,
       fontSize: 14,
+      marginBottom: 20,
       textAlign: 'center',
     },
-    altSection: {
-      marginTop: 18,
+    linkGroup: {
+      marginTop: 16,
       fontSize: 14,
+      textAlign: 'center',
       color: '#aaa',
     },
-    altBtn: {
+    linkBtn: {
       background: 'none',
       border: 'none',
-      color: '#00c6ff',
+      color: '#00b0ff',
       cursor: 'pointer',
       textDecoration: 'underline',
-      fontWeight: 500,
+      padding: 0,
+      marginLeft: 6,
+      fontWeight: '600',
     },
   };
-
-  const renderInput = ({ type, placeholder, value, onChange, icon, showPassword, togglePassword }) => (
-    <div style={styles.inputGroup}>
-      <span style={styles.inputIcon}>{icon}</span>
-      <input
-        type={showPassword ? 'text' : type}
-        placeholder={placeholder}
-        value={value}
-        onChange={onChange}
-        style={styles.input}
-      />
-      {type === 'password' && (
-        <button
-          onClick={togglePassword}
-          type="button"
-          style={styles.toggleBtn}
-        >
-          {showPassword ? '🙈' : '👁️'}
-        </button>
-      )}
-    </div>
-  );
 
   return (
     <div style={styles.page}>
       <div style={styles.box}>
-        {mode === 'login' && (
+        {isLoggedIn ? (
           <>
-            <div style={styles.header}>🔐 Login</div>
-            {error && <div style={styles.error}>{error}</div>}
-            {renderInput({ type: 'text', placeholder: 'Username', value: loginUsername, onChange: (e) => setLoginUsername(e.target.value), icon: '👤' })}
-            {renderInput({ type: 'password', placeholder: 'Password', value: loginPassword, onChange: (e) => setLoginPassword(e.target.value), icon: '🔒', showPassword: showLoginPassword, togglePassword: () => setShowLoginPassword(!showLoginPassword) })}
-            <button onClick={handleLogin} style={{ ...styles.submit, ...(loading ? styles.submitDisabled : {}) }} disabled={loading}>
-              {loading ? 'Logging in...' : 'Login'}
+            <div style={styles.header}>Welcome!</div>
+            <button onClick={handleLogout} style={{ ...styles.button, ...styles.logoutButton }}>
+              Logout
             </button>
-            <div style={styles.altSection}>
-              <button onClick={() => { setMode('forgot'); setError(''); }} style={styles.altBtn}>Forgot Password?</button><br />
-              Don't have an account? <button onClick={() => { setMode('register'); setError(''); }} style={styles.altBtn}>Register</button>
-            </div>
           </>
-        )}
-
-        {mode === 'register' && (
+        ) : (
           <>
-            <div style={styles.header}>📝 Register</div>
-            {error && <div style={styles.error}>{error}</div>}
-            {renderInput({ type: 'text', placeholder: 'Username', value: regUsername, onChange: (e) => setRegUsername(e.target.value), icon: '👤' })}
-            {renderInput({ type: 'password', placeholder: 'Password', value: regPassword, onChange: (e) => setRegPassword(e.target.value), icon: '🔒', showPassword: showRegPassword, togglePassword: () => setShowRegPassword(!showRegPassword) })}
-            {renderInput({ type: 'password', placeholder: 'Confirm Password', value: regConfirmPassword, onChange: (e) => setRegConfirmPassword(e.target.value), icon: '🔒', showPassword: showRegConfirmPassword, togglePassword: () => setShowRegConfirmPassword(!showRegConfirmPassword) })}
-            <button onClick={handleRegister} style={styles.submit} disabled={loading}>
-              {loading ? 'Registering...' : 'Register'}
-            </button>
-            <div style={styles.altSection}>
-              Already have an account? <button onClick={() => { setMode('login'); setError(''); }} style={styles.altBtn}>Login</button>
-            </div>
-          </>
-        )}
+            {mode === 'login' && (
+              <>
+                <div style={styles.header}>Login</div>
+                {error && <div style={styles.error}>{error}</div>}
+                <input
+                  type="text"
+                  placeholder="Username"
+                  value={loginUsername}
+                  onChange={(e) => setLoginUsername(e.target.value)}
+                  style={styles.input}
+                  spellCheck="false"
+                  autoComplete="username"
+                />
+                <input
+                  type="password"
+                  placeholder="Password"
+                  value={loginPassword}
+                  onChange={(e) => setLoginPassword(e.target.value)}
+                  style={styles.input}
+                  autoComplete="current-password"
+                />
+                <button
+                  onClick={handleLogin}
+                  disabled={loading}
+                  style={{ ...styles.button, ...(loading ? styles.buttonDisabled : {}) }}
+                >
+                  {loading ? 'Logging in...' : 'Login'}
+                </button>
+                <div style={styles.linkGroup}>
+                  <button onClick={() => { setMode('forgot'); setError(''); }} style={styles.linkBtn}>
+                    Forgot Password?
+                  </button>
+                  <br />
+                  Don't have an account?{' '}
+                  <button onClick={() => { setMode('register'); setError(''); }} style={styles.linkBtn}>
+                    Register
+                  </button>
+                </div>
+              </>
+            )}
 
-        {mode === 'forgot' && (
-          <>
-            <div style={styles.header}>🔑 Reset Password</div>
-            {error && <div style={styles.error}>{error}</div>}
-            <div style={styles.inputGroup}>
-              <span style={styles.inputIcon}>📧</span>
-              <input
-                type="email"
-                placeholder="Enter your email"
-                value={forgotEmail}
-                onChange={(e) => setForgotEmail(e.target.value)}
-                style={styles.input}
-              />
-            </div>
-            <button onClick={handleForgot} style={styles.submit} disabled={loading}>
-              {loading ? 'Sending...' : 'Send Reset Link'}
-            </button>
-            <div style={styles.altSection}>
-              Remembered password? <button onClick={() => { setMode('login'); setError(''); }} style={styles.altBtn}>Login</button>
-            </div>
+            {mode === 'register' && (
+              <>
+                <div style={styles.header}>Register</div>
+                {error && <div style={styles.error}>{error}</div>}
+                <input
+                  type="text"
+                  placeholder="Username"
+                  value={regUsername}
+                  onChange={(e) => setRegUsername(e.target.value)}
+                  style={styles.input}
+                  spellCheck="false"
+                  autoComplete="username"
+                />
+                <input
+                  type="password"
+                  placeholder="Password"
+                  value={regPassword}
+                  onChange={(e) => setRegPassword(e.target.value)}
+                  style={styles.input}
+                  autoComplete="new-password"
+                />
+                <input
+                  type="password"
+                  placeholder="Confirm Password"
+                  value={regConfirmPassword}
+                  onChange={(e) => setRegConfirmPassword(e.target.value)}
+                  style={styles.input}
+                  autoComplete="new-password"
+                />
+                <button
+                  onClick={handleRegister}
+                  disabled={loading}
+                  style={{ ...styles.button, ...(loading ? styles.buttonDisabled : {}) }}
+                >
+                  {loading ? 'Registering...' : 'Register'}
+                </button>
+                <div style={styles.linkGroup}>
+                  Already have an account?{' '}
+                  <button onClick={() => { setMode('login'); setError(''); }} style={styles.linkBtn}>
+                    Login
+                  </button>
+                </div>
+              </>
+            )}
+
+            {mode === 'forgot' && (
+              <>
+                <div style={styles.header}>Reset Password</div>
+                {error && <div style={styles.error}>{error}</div>}
+                <input
+                  type="email"
+                  placeholder="Enter your email"
+                  value={forgotEmail}
+                  onChange={(e) => setForgotEmail(e.target.value)}
+                  style={styles.input}
+                  autoComplete="email"
+                />
+                <button
+                  onClick={handleForgot}
+                  disabled={loading}
+                  style={{ ...styles.button, ...(loading ? styles.buttonDisabled : {}) }}
+                >
+                  {loading ? 'Sending...' : 'Send Reset Link'}
+                </button>
+                <div style={styles.linkGroup}>
+                  Remembered password?{' '}
+                  <button onClick={() => { setMode('login'); setError(''); }} style={styles.linkBtn}>
+                    Login
+                  </button>
+                </div>
+              </>
+            )}
           </>
         )}
       </div>
